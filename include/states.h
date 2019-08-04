@@ -12,7 +12,7 @@ class Context {
     const char* server_password = "tempPassNG"; // Пароль от Wi-Fi по умолчанию
     char client_ssid[32];
     char client_password[64];
-    IState init_state();
+    IState* init_state();
 };
 
 /**
@@ -20,7 +20,6 @@ class Context {
  */
 class IState {
   public:
-    
-    virtual IState next(Context *ctx);
+    virtual IState* next(Context *ctx) = 0;
 };
 #endif

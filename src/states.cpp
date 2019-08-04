@@ -9,8 +9,8 @@
  */
 class FatalErrorState : public IState {
   public:
-    IState next(Context *ctx) {
-      return *this;
+    IState* next(Context *ctx) {
+      return this;
     }
 };
 
@@ -22,11 +22,11 @@ class StartWebServerState : public IState {
     StartWebServerState() : server(80) {
     }
     
-    IState next(Context *ctx) {
+    IState* next(Context *ctx) {
       start();
       // созвращаем состояние режима обнаружения
       // @TODO безусловно?
-      return FatalErrorState();
+      return new FatalErrorState();
     }
 
     void start() {
@@ -47,17 +47,17 @@ class StartWebServerState : public IState {
  */
 class StartWiFiServerState : public IState {
   public:
-    IState next(Context *ctx) {
+    IState* next(Context *ctx) {
       WiFi.mode(WIFI_AP);
       if (WiFi.softAP(ctx->server_sessid, ctx->server_password)) {
         Serial.println("Wi-Fi access point started!");
         Serial.print("Wi-Fi device IP address: ");
         Serial.println(WiFi.softAPIP());
       
-        return StartWebServerState();
+        return new StartWebServerState();
       } else {
         Serial.println("Failure start wifi AP");
-        return FatalErrorState();
+        return new FatalErrorState();
       }
     }
 };
@@ -67,7 +67,7 @@ class StartWiFiServerState : public IState {
  */
 class LoadConfigurationState : public IState {
   public:
-    IState next(Context *ctx) {
+    IState* next(Context *ctx) {
       boolean success = false;
       if (read_file((char *)"login", ctx->client_ssid, 32)) {
         success = true;
@@ -75,9 +75,9 @@ class LoadConfigurationState : public IState {
       
       if (success && read_file((char *)"password", ctx->client_password, 64)) {
         // to wifi client state
-        return FatalErrorState(); // @TODO IMPLEMENT!!!
+        return new FatalErrorState(); // @TODO IMPLEMENT!!!
       } else {
-        return StartWiFiServerState();
+        return new StartWiFiServerState();
       }
     }
   private:
@@ -113,14 +113,14 @@ class LoadConfigurationState : public IState {
  */
 class InitializedState : public IState {
   public:
-    IState next(Context *ctx) {
-      return LoadConfigurationState();
+    IState* next(Context *ctx) {
+      return new LoadConfigurationState();
     }
 };
 
 /**
  * Объявление инициализирующего состояния
  */
-IState Context::init_state() {
-    return InitializedState();
+IState* Context::init_state() {
+    return new InitializedState();
 }

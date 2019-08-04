@@ -14,10 +14,10 @@ class Application {
       state = context.init_state();
     }
     void run() {
-      state = state.next(&context);
+      state = state->next(&context);
     }
   private:
-    IState state; // значение по умолчанию
+    IState* state; // значение по умолчанию
     Context context;
 };
 
