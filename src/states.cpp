@@ -1,8 +1,7 @@
-#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <FS.h>
 #include "states.h"
+#include "storage.h"
 
 /**
  *  Состояние фатальной ошибки
@@ -68,43 +67,16 @@ class StartWiFiServerState : public IState {
 class LoadConfigurationState : public IState {
   public:
     IState* next(Context *ctx) {
-      boolean success = false;
-      if (read_file((char *)"login", ctx->client_ssid, 32)) {
-        success = true;
-      }
-      
-      if (success && read_file((char *)"password", ctx->client_password, 64)) {
+      IStorage* storage = StorageFactory().create();
+      storage->readClientWiFiAP(ctx->client_ssid);
+      storage->readClientWiFiPassword(ctx->client_password);
+
+      if ((ctx->client_password[0] > 0) && (ctx->client_ssid[0] > 0)) {
         // to wifi client state
         return new FatalErrorState(); // @TODO IMPLEMENT!!!
       } else {
         return new StartWiFiServerState();
       }
-    }
-  private:
-    boolean read_file(char* name, char* buffer, int size) {
-      File f = SPIFFS.open("/login", "r");
-      if (!f) {
-        Serial.print("Unable open saved ");
-        Serial.println(name);
-        return false;
-      }
-
-      if (f.size() == 0) {
-        Serial.print("Opened file is empty ");
-        Serial.println(name);
-        f.close();
-        return false;
-      }
-
-      f.readBytes(buffer, size);
-      f.close();
-
-      Serial.print("Readed ");
-      Serial.print(name);
-      Serial.print(" with content: ");
-      Serial.print(buffer);
-
-      return true;
     }
 };
 
