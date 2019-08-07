@@ -1,3 +1,5 @@
+#include "webserver.h"
+
 #ifndef STATES_H
 #define STATES_H
 
@@ -12,6 +14,7 @@ class Context {
     const char* server_password = "tempPassNG"; // Пароль от Wi-Fi по умолчанию
     char client_ssid[32];
     char client_password[64];
+    IWebServer *webserver;
     IState* init_state();
 };
 

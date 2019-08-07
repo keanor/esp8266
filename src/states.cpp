@@ -2,6 +2,7 @@
 #include <ESP8266WebServer.h>
 #include "states.h"
 #include "storage.h"
+#include "webserver.h"
 
 /**
  *  Состояние фатальной ошибки
@@ -14,30 +15,37 @@ class FatalErrorState : public IState {
 };
 
 /**
+ * Корректное рабочее состояние
+ */
+class WorkerState : public IState {
+  IState *next(Context *ctx) {
+    ctx->webserver->handle();
+    return this;
+  }
+};
+
+/**
+ * Состояние запуска механизма обнаружения
+ */
+class StartDiscoveryState : public IState {
+  public:
+    IState *next(Context *ctx) {
+      return new WorkerState();
+    }
+};
+
+/**
  * Состояние запуска Web сервера
  */
 class StartWebServerState : public IState {
   public:
-    StartWebServerState() : server(80) {
-    }
-    
     IState* next(Context *ctx) {
-      start();
+      IWebServer *webserver = WebServerFactory().create();
+      webserver->start();
+      ctx->webserver = webserver;
       // созвращаем состояние режима обнаружения
       // @TODO безусловно?
       return new FatalErrorState();
-    }
-
-    void start() {
-        server.on("/", std::bind(&StartWebServerState::mainPage, this));
-        server.begin();
-        Serial.println("Web server started on port 80");
-    }
-  private:
-    ESP8266WebServer server;
-
-    void mainPage(void) {
-      server.send_P(200, "text/html", "<h1>TEST</h1>");
     }
 };
 
