@@ -24,5 +24,6 @@ class Context {
 class IState {
   public:
     virtual IState* next(Context *ctx) = 0;
+    virtual const char* title();
 };
 #endif

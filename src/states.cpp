@@ -12,6 +12,10 @@ class FatalErrorState : public IState {
     IState* next(Context *ctx) {
       return this;
     }
+
+    const char* title() {
+      return "Fatal error";
+    }
 };
 
 /**
@@ -22,6 +26,10 @@ class WorkerState : public IState {
     ctx->webserver->handle();
     return this;
   }
+
+  const char* title() {
+    return "Working state";
+  }
 };
 
 /**
@@ -31,6 +39,10 @@ class StartDiscoveryState : public IState {
   public:
     IState *next(Context *ctx) {
       return new WorkerState();
+    }
+
+    const char* title() {
+      return "Start discovery";
     }
 };
 
@@ -45,7 +57,11 @@ class StartWebServerState : public IState {
       ctx->webserver = webserver;
       // созвращаем состояние режима обнаружения
       // @TODO безусловно?
-      return new FatalErrorState();
+      return new StartDiscoveryState();
+    }
+
+    const char* title() {
+      return "Web server";
     }
 };
 
@@ -67,6 +83,10 @@ class StartWiFiServerState : public IState {
         return new FatalErrorState();
       }
     }
+
+    const char* title() {
+      return "Start Wi-Fi server";
+    }
 };
 
 /**
@@ -86,6 +106,10 @@ class LoadConfigurationState : public IState {
         return new StartWiFiServerState();
       }
     }
+
+    const char* title() {
+      return "Load configuration";
+    }
 };
 
 /**
@@ -95,6 +119,10 @@ class InitializedState : public IState {
   public:
     IState* next(Context *ctx) {
       return new LoadConfigurationState();
+    }
+
+    const char* title() {
+      return "Initialization state";
     }
 };
 

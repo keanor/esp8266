@@ -14,7 +14,16 @@ class Application {
       state = context.init_state();
     }
     void run() {
-      state = state->next(&context);
+      IState* new_state = state->next(&context);
+      if (strcmp(state->title(), new_state->title()) != 0) {
+        Serial.print("State \"");
+        Serial.print(state->title());
+        Serial.print("\" changed to \"");
+        Serial.print(new_state->title());
+        Serial.println(state->title());
+
+        state = new_state;
+      }
     }
   private:
     IState* state; // значение по умолчанию

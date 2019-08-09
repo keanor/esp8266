@@ -28,24 +28,29 @@ class WebServer : public IWebServer {
             const char* html =
             "<html>"
                 "<head>"
+                    "<meta charset=\"UTF-8\">"
                     "<link rel=\"stylesheet\" href=\"/style.css\" />"
                     "<link rel=\"shortcut icon\" href=\"/favicon.png\" type=\"image/png\">"
                     "<title>Панель управления умным домом</title>"
                 "</head>"
                 "<body>"
-                    
+                    "<h1>Web server работает</h1>"
+                    "<p><a href=\"/favicon.png\">Иконка</a></p>"
+                    "<p><a href=\"/style.css\">Стили</a></p>"
                 "</body>"
             "</html>";
-            server->send_P(200, "text/html", "<h1>TEST</h1>");
+            server->send(200, "text/html", html);
         }
 
         void favicon(void) {
-            server->send(200, "images/png", String((char*)&resources_favicon_png));
+            server->setContentLength(resources_favicon_png_len);
+            server->send(200, "image/png", (char*)resources_favicon_png);
         }
 
         void stylesheet(void) {
+            server->setContentLength(resources_skeleton_min_css_tar_gz_len);
             server->sendHeader("Content-Encoding", "gzip");
-            server->send(200, "text/css", String((char*)&resources_skeleton_min_css_tar_gz));
+            server->send(200, "text/css", (char*)resources_skeleton_min_css_tar_gz);
         }
 };
 
