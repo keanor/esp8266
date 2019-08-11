@@ -6,3 +6,4 @@
 .vscode/settings.json
 resources/skeleton.min.css.tar.gz
 include/*.inl
+.DSStore

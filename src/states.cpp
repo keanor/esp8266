@@ -71,7 +71,7 @@ class StartWebServerState : public IState {
 class StartWiFiServerState : public IState {
   public:
     IState* next(Context *ctx) {
-      WiFi.mode(WIFI_AP);
+      WiFi.mode(WIFI_AP_STA);
       if (WiFi.softAP(ctx->server_sessid, ctx->server_password)) {
         Serial.println("Wi-Fi access point started!");
         Serial.print("Wi-Fi device IP address: ");

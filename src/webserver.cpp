@@ -1,7 +1,9 @@
 #include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
 #include "webserver.h"
 #include "favicon.inl"
 #include "skeleton.inl"
+#include "index.html.inl"
 
 class WebServer : public IWebServer {
     public:
@@ -25,21 +27,12 @@ class WebServer : public IWebServer {
         ESP8266WebServer* server;
 
         void main(void) {
-            const char* html =
-            "<html>"
-                "<head>"
-                    "<meta charset=\"UTF-8\">"
-                    "<link rel=\"stylesheet\" href=\"/style.css\" />"
-                    "<link rel=\"shortcut icon\" href=\"/favicon.png\" type=\"image/png\">"
-                    "<title>Панель управления умным домом</title>"
-                "</head>"
-                "<body>"
-                    "<h1>Web server работает</h1>"
-                    "<p><a href=\"/favicon.png\">Иконка</a></p>"
-                    "<p><a href=\"/style.css\">Стили</a></p>"
-                "</body>"
-            "</html>";
-            server->send(200, "text/html", html);
+            server->send_P(
+                200, 
+                "text/html", 
+                (char*)resources_index_html, 
+                resources_index_html_len
+            );
         }
 
         void favicon(void) {
@@ -62,6 +55,8 @@ class WebServer : public IWebServer {
                 resources_skeleton_min_css_tar_gz_len
             );
         }
+
+        // @TODO список точек доступа по /aplist
 };
 
 IWebServer* WebServerFactory::create() {
