@@ -1,3 +1,4 @@
+#include "storage.h"
 #ifndef WEBSERVER_H
 #define WEBSERVER_H
 
@@ -13,6 +14,6 @@ class IWebServer {
 
 class WebServerFactory {
     public:
-        IWebServer* create();
+        IWebServer* create(IStorage* storage);
 };
 #endif

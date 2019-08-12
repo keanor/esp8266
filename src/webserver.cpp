@@ -1,20 +1,24 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include "webserver.h"
+#include "storage.h"
 #include "favicon.inl"
 #include "skeleton.inl"
 #include "index.html.inl"
 
 class WebServer : public IWebServer {
     public:
-        WebServer() {
+        WebServer(IStorage* storage) {
             server = new ESP8266WebServer(80);
+            this->storage = storage;
         }
 
         void start() {
             server->on("/", std::bind(&WebServer::main, this));
             server->on("/favicon.png", std::bind(&WebServer::favicon, this));
             server->on("/style.css", std::bind(&WebServer::stylesheet, this));
+            server->on("/aplist", std::bind(&WebServer::aplist, this));
+            server->on("/save", std::bind(&WebServer::save, this));
 
             server->begin();
             Serial.println("Web server started on port 80");
@@ -25,8 +29,10 @@ class WebServer : public IWebServer {
         }
     private:
         ESP8266WebServer* server;
+        IStorage* storage;
 
         void main(void) {
+            server->setContentLength(resources_index_html_len);
             server->send_P(
                 200, 
                 "text/html", 
@@ -56,9 +62,47 @@ class WebServer : public IWebServer {
             );
         }
 
-        // @TODO список точек доступа по /aplist
+        void aplist(void) {
+            int n = WiFi.scanNetworks();
+            String content = "";
+            if (n > 0) {
+                for (int i = 0; i < n; i++) {
+                    content += WiFi.SSID(1);
+                    if (n - i > 1) {
+                        content += ",";
+                    }
+                }
+            }
+            server->send(200, "text/html", content);
+        }
+
+        void save(void) {
+            if( ! server->hasArg("ssid") || 
+                ! server->hasArg("pass") || 
+                server->arg("ssid") == NULL || 
+                server->arg("pass") == NULL) 
+            {
+                server->send(200, "text/plain", "error");
+            } else {
+                String ssid_str = server->arg("ssid");
+                char ssid_arr[ssid_str.length()];
+                memcpy(ssid_arr, ssid_str.c_str(), ssid_str.length());
+                storage->writeClientWiFiAP(ssid_arr);
+
+                String pass_str = server->arg("pass");
+                char pass_arr[pass_str.length()];
+                memcpy(pass_arr, pass_str.c_str(), pass_str.length());
+                storage->writeClientWiFiAP(pass_arr);
+
+                server->send(200, "text/plain", "success");
+
+                Serial.println("Configuration saved, restart hardware");
+                delay(200);
+                ESP.restart();
+            }
+        }
 };
 
-IWebServer* WebServerFactory::create() {
-    return new WebServer();
+IWebServer* WebServerFactory::create(IStorage* storage) {
+    return new WebServer(storage);
 }

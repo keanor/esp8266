@@ -1,4 +1,5 @@
 #include "webserver.h"
+#include "storage.h"
 
 #ifndef STATES_H
 #define STATES_H
@@ -15,6 +16,7 @@ class Context {
     char client_ssid[32];
     char client_password[64];
     IWebServer *webserver;
+    IStorage *storage;
     IState* init_state();
 };
 

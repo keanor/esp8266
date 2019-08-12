@@ -52,7 +52,7 @@ class StartDiscoveryState : public IState {
 class StartWebServerState : public IState {
   public:
     IState* next(Context *ctx) {
-      IWebServer *webserver = WebServerFactory().create();
+      IWebServer *webserver = WebServerFactory().create(ctx->storage);
       webserver->start();
       ctx->webserver = webserver;
       // созвращаем состояние режима обнаружения
@@ -71,7 +71,7 @@ class StartWebServerState : public IState {
 class StartWiFiServerState : public IState {
   public:
     IState* next(Context *ctx) {
-      WiFi.mode(WIFI_AP_STA);
+      
       if (WiFi.softAP(ctx->server_sessid, ctx->server_password)) {
         Serial.println("Wi-Fi access point started!");
         Serial.print("Wi-Fi device IP address: ");
@@ -89,16 +89,58 @@ class StartWiFiServerState : public IState {
     }
 };
 
+class StartWiFiClientState : public IState {
+  IState* next(Context *ctx) {
+    WiFi.mode(WIFI_AP_STA);
+    if ((ctx->client_password[0] > 0) && (ctx->client_ssid[0] > 0)) {
+        Serial.print("Connecting to ssid: ");
+        Serial.println(ctx->client_ssid);
+
+        WiFi.begin(ctx->client_ssid, ctx->client_password);
+        int i = 0;
+        boolean needIterate = true;
+        do {
+          int status = WiFi.status();
+          switch (status)
+          {
+          case WL_CONNECTED:
+            Serial.println("\nConnection success!");
+            break;
+          case WL_CONNECT_FAILED:
+            Serial.println("\nConnection failed!");
+            break;
+          default:
+            Serial.print(status);
+            Serial.print(".");
+            if (i == 20) {
+              Serial.println("\nConnection timeout...");
+              needIterate = false;
+            } else {
+              delay(200);
+            }
+            break;
+          }
+        } while (needIterate);
+    }
+
+    return new StartWiFiServerState();
+  }
+
+  const char* title() {
+    return "Start Wi-Fi client state";
+  }
+};
+
 /**
  * Класс состояния загрузки конфигурации
  */
 class LoadConfigurationState : public IState {
   public:
     IState* next(Context *ctx) {
-      IStorage* storage = StorageFactory().create();
-      storage->readClientWiFiAP(ctx->client_ssid);
-      storage->readClientWiFiPassword(ctx->client_password);
+      ctx->storage->readClientWiFiAP(ctx->client_ssid);
+      ctx->storage->readClientWiFiPassword(ctx->client_password);
 
+      return new StartWiFiClientState();
       if ((ctx->client_password[0] > 0) && (ctx->client_ssid[0] > 0)) {
         // to wifi client state
         return new FatalErrorState(); // @TODO IMPLEMENT!!!
@@ -118,6 +160,7 @@ class LoadConfigurationState : public IState {
 class InitializedState : public IState {
   public:
     IState* next(Context *ctx) {
+      ctx->storage = StorageFactory().create();
       return new LoadConfigurationState();
     }
 
