@@ -16,7 +16,8 @@
                     <div class="row">
                         <div class="one-third column">&nbsp;</div>
                         <div class="one-third column">
-                            <label for="ssid">Точка доступа (<a href="#" onclick="javascript:refeshAPList();">Обновить список</a>)</label>
+                            <label for="ssid">Точка доступа (<a href="#" 
+                                onclick="javascript:refeshAPList();">Обновить список</a>)</label>
                             <select class="u-full-width" id="ssid" name="ssid"></select>
                         </div>
                         <div class="one-third column">&nbsp;</div>
@@ -34,7 +35,8 @@
                     <div class="row">
                         <div class="one-third column">&nbsp;</div>
                         <div class="one-third column">
-                            <input class="button-primary" type="submit" value="Сохранить">
+                            <input class="button-primary" type="button" value="Сохранить" 
+                                onclick="javascript:saveFormData();" />
                         </div>
                         <div class="one-third column">&nbsp;</div>
                     </div>
@@ -43,6 +45,31 @@
         </div>
     </body>
     <script type="text/javascript">
+        function saveFormData() {
+            let select = document.getElementById('ssid');
+            let data = {
+                ssid: select.options[select.selectedIndex].value,
+                pass: document.getElementById("pass").value
+            };
+
+            fetch('/save', {
+                method: 'POST',
+                body: Object.keys(data).map(key => key + '=' + data[key]).join('&')
+            }).then(function (response) {
+                if (response.ok) {
+                    response.text().then(function (text) {
+                        if (text == "success") {
+                            alert("Настройки сохранены, устройство будет перезагружено!");
+                        } else {
+                            alert("Ошибка сохранения настроек, проверьте корректность данных");
+                        }
+                    });
+                } else {
+                    alert("Ошибка HTTP POST: " + response.status);
+                }
+            });
+        };
+
         function refeshAPList() {
             fetch('/aplist').then(function (response) {
                 if (response.ok) {
@@ -50,14 +77,14 @@
                         var select = document.getElementById("ssid");
                         select.innerHTML = "";
                         text.split(",").forEach(function (ssid) {
-                            select.innerHTML += "<option>" + ssid + "</option>";
+                            select.innerHTML += "<option value=\"" + ssid + "\">" + ssid + "</option>";
                         });
                     });
                 } else {
-                    alert("Ошибка HTTP: " + response.status);
+                    alert("Ошибка HTTP GET: " + response.status);
                 }
             })
-        }
+        };
 
         document.addEventListener('DOMContentLoaded', function () {
             refeshAPList();    
