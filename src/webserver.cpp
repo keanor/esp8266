@@ -67,7 +67,7 @@ class WebServer : public IWebServer {
             String content = "";
             if (n > 0) {
                 for (int i = 0; i < n; i++) {
-                    content += WiFi.SSID(1);
+                    content += WiFi.SSID(i);
                     if (n - i > 1) {
                         content += ",";
                     }

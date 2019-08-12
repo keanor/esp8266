@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <html>
     <head>
@@ -7,6 +8,49 @@
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="style.css">
         <link rel="icon" type="image/png" href="/favicon.png">
+
+        <script type="text/javascript">
+            function saveFormData() {
+                let select = document.getElementById('ssid');
+                let data = {
+                    ssid: select.options[select.selectedIndex].value,
+                    pass: document.getElementById("pass").value
+                };
+    
+                fetch('/save', {
+                    method: 'POST',
+                    body: Object.keys(data).map(key => key + '=' + data[key]).join('&')
+                }).then(function (response) {
+                    if (response.ok) {
+                        response.text().then(function (text) {
+                            if (text == "success") {
+                                alert("Настройки сохранены, устройство будет перезагружено!");
+                            } else {
+                                alert("Ошибка сохранения настроек, проверьте корректность данных");
+                            }
+                        });
+                    } else {
+                        alert("Ошибка HTTP POST: " + response.status);
+                    }
+                });
+            };
+    
+            function refeshAPList() {
+                fetch('/aplist').then(function (response) {
+                    if (response.ok) {
+                        response.text().then(function (text) {
+                            var select = document.getElementById("ssid");
+                            select.innerHTML = "";
+                            text.split(",").forEach(function (ssid) {
+                                select.innerHTML += "<option value=\"" + ssid + "\">" + ssid + "</option>";
+                            });
+                        });
+                    } else {
+                        alert("Ошибка HTTP GET: " + response.status);
+                    }
+                })
+            };
+        </script>
     </head>
     <body>
         <div class="section">
@@ -43,51 +87,10 @@
                 </form>
             </div>
         </div>
-    </body>
-    <script type="text/javascript">
-        function saveFormData() {
-            let select = document.getElementById('ssid');
-            let data = {
-                ssid: select.options[select.selectedIndex].value,
-                pass: document.getElementById("pass").value
-            };
-
-            fetch('/save', {
-                method: 'POST',
-                body: Object.keys(data).map(key => key + '=' + data[key]).join('&')
-            }).then(function (response) {
-                if (response.ok) {
-                    response.text().then(function (text) {
-                        if (text == "success") {
-                            alert("Настройки сохранены, устройство будет перезагружено!");
-                        } else {
-                            alert("Ошибка сохранения настроек, проверьте корректность данных");
-                        }
-                    });
-                } else {
-                    alert("Ошибка HTTP POST: " + response.status);
-                }
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function () {
+                refeshAPList();    
             });
-        };
-
-        function refeshAPList() {
-            fetch('/aplist').then(function (response) {
-                if (response.ok) {
-                    response.text().then(function (text) {
-                        var select = document.getElementById("ssid");
-                        select.innerHTML = "";
-                        text.split(",").forEach(function (ssid) {
-                            select.innerHTML += "<option value=\"" + ssid + "\">" + ssid + "</option>";
-                        });
-                    });
-                } else {
-                    alert("Ошибка HTTP GET: " + response.status);
-                }
-            })
-        };
-
-        document.addEventListener('DOMContentLoaded', function () {
-            refeshAPList();    
-        });
-    </script>
+        </script>
+    </body>
 </html>
