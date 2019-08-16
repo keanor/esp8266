@@ -1,56 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<html>
     <head>
         <meta charset="utf-8">
         <title>Умный светильник</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">"
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Блокирует отрисовку (((
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
+        -->
         <link rel="stylesheet" href="style.css">
         <link rel="icon" type="image/png" href="/favicon.png">
-
-        <script type="text/javascript">
-            function saveFormData() {
-                let select = document.getElementById('ssid');
-                let data = {
-                    ssid: select.options[select.selectedIndex].value,
-                    pass: document.getElementById("pass").value
-                };
-    
-                fetch('/save', {
-                    method: 'POST',
-                    body: Object.keys(data).map(key => key + '=' + data[key]).join('&')
-                }).then(function (response) {
-                    if (response.ok) {
-                        response.text().then(function (text) {
-                            if (text == "success") {
-                                alert("Настройки сохранены, устройство будет перезагружено!");
-                            } else {
-                                alert("Ошибка сохранения настроек, проверьте корректность данных");
-                            }
-                        });
-                    } else {
-                        alert("Ошибка HTTP POST: " + response.status);
-                    }
-                });
-            };
-    
-            function refeshAPList() {
-                fetch('/aplist').then(function (response) {
-                    if (response.ok) {
-                        response.text().then(function (text) {
-                            var select = document.getElementById("ssid");
-                            select.innerHTML = "";
-                            text.split(",").forEach(function (ssid) {
-                                select.innerHTML += "<option value=\"" + ssid + "\">" + ssid + "</option>";
-                            });
-                        });
-                    } else {
-                        alert("Ошибка HTTP GET: " + response.status);
-                    }
-                })
-            };
-        </script>
     </head>
     <body>
         <div class="section">
@@ -86,8 +44,72 @@
                     </div>
                 </form>
             </div>
+            <div class="section">
+                <div class="container">
+                    <ul id="logList">
+                    </ul>
+                </div>
+            </div>
         </div>
         <script type="text/javascript">
+            function saveFormData() {
+                let select = document.getElementById('ssid');
+                let data = {
+                    ssid: select.options[select.selectedIndex].value,
+                    pass: document.getElementById("pass").value
+                };
+    
+                fetch('/save', {
+                    method: 'POST',
+                    headers: {  
+                        "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"  
+                    },
+                    body: Object.keys(data).map(key => key + '=' + data[key]).join('&')
+                }).then(function (response) {
+                    if (response.ok) {
+                        response.text().then(function (text) {
+                            if (text == "success") {
+                                alert("Настройки сохранены, устройство будет перезагружено!");
+                            } else {
+                                alert("Ошибка сохранения настроек, проверьте корректность данных");
+                            }
+                        });
+                    } else {
+                        alert("Ошибка HTTP POST: " + response.status);
+                    }
+                });
+            };
+    
+            function refeshAPList() {
+                fetch('/aplist').then(function (response) {
+                    if (response.ok) {
+                        response.text().then(function (text) {
+                            var select = document.getElementById("ssid");
+                            select.innerHTML = "";
+                            text.split(",").forEach(function (ssid) {
+                                select.innerHTML += "<option value=\"" + ssid + "\">" + ssid + "</option>";
+                            });
+                        });
+                    } else {
+                        alert("Ошибка HTTP GET: " + response.status);
+                    }
+                })
+            };
+
+            function loadLogList() {
+                fetch('/loglist').then(function (response) {
+                    if (response.ok) {
+                        response.text.then(function(text) {
+                            var logList = docuemnt.getElementById("logList");
+                            logList.innerHTML = "";
+                            text.split("|").forEach(function (logEntry) {
+                                logList.innerHTML += "<li>" + logEntry + "</li>";
+                            })
+                        })
+                    }
+                })
+            }
+
             document.addEventListener('DOMContentLoaded', function () {
                 refeshAPList();    
             });

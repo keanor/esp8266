@@ -77,12 +77,21 @@ class WebServer : public IWebServer {
         }
 
         void save(void) {
+            // c3Ya6PN796
             if( ! server->hasArg("ssid") || 
                 ! server->hasArg("pass") || 
                 server->arg("ssid") == NULL || 
                 server->arg("pass") == NULL) 
             {
-                server->send(200, "text/plain", "error");
+                String message = "POST\nHeaders:\n";
+                for (uint8_t i = 0; i < server->headers(); i++) {
+                    message += server->headerName(i) + ": " + server->header(i) + "\n";
+                }
+                message += "\nRequest params:\n";
+                for (uint8_t i = 0; i < server->args(); i++) {
+                    message += " " + server->argName(i) + ": " + server->arg(i) + "\n";
+                }
+                server->send(200, "text/plain", message);
             } else {
                 String ssid_str = server->arg("ssid");
                 char ssid_arr[ssid_str.length()];
