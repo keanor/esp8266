@@ -99,18 +99,22 @@ class StartWiFiClientState : public IState {
         WiFi.begin(ctx->client_ssid, ctx->client_password);
         int i = 0;
         boolean needIterate = true;
+        int status;
         do {
-          int status = WiFi.status();
+          status = WiFi.status();
           switch (status)
           {
           case WL_CONNECTED:
             Serial.println("\nConnection success!");
+            Serial.print("IP address: ");
+            Serial.println(WiFi.localIP());
+            needIterate = false;
             break;
           case WL_CONNECT_FAILED:
             Serial.println("\nConnection failed!");
+            needIterate = false;
             break;
           default:
-            Serial.print(status);
             Serial.print(".");
             if (i == 20) {
               Serial.println("\nConnection timeout...");
@@ -121,6 +125,12 @@ class StartWiFiClientState : public IState {
             break;
           }
         } while (needIterate);
+
+        if (status == WL_CONNECTED ) {
+          return new StartWebServerState();
+        }
+    } else {
+      Serial.println("Идентификатор точки доступа и пароль не сохранены");
     }
 
     return new StartWiFiServerState();
@@ -141,12 +151,6 @@ class LoadConfigurationState : public IState {
       ctx->storage->readClientWiFiPassword(ctx->client_password);
 
       return new StartWiFiClientState();
-      if ((ctx->client_password[0] > 0) && (ctx->client_ssid[0] > 0)) {
-        // to wifi client state
-        return new FatalErrorState(); // @TODO IMPLEMENT!!!
-      } else {
-        return new StartWiFiServerState();
-      }
     }
 
     const char* title() {

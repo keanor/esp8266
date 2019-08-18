@@ -8,8 +8,9 @@ switch ($_SERVER['REQUEST_URI']) {
         echo file_get_contents(__DIR__ . '/index.html');
         break;
     case '/style.css':
+        header('Content-Type: text/css');
         header('Content-Encoding: gzip');
-        echo file_get_contents(__DIR__ . '/skeleton.min.css.tar.gz');
+        echo file_get_contents(__DIR__ . '/skeleton.min.css.gz');
         break;
     case '/favicon.png':
         header('Content-Type: image/png');
@@ -17,6 +18,9 @@ switch ($_SERVER['REQUEST_URI']) {
         break;
     case '/aplist':
         echo 'one,two,three,for';
+        break;
+    case '/loglist':
+        echo "n aiuwrnga iwerugnalwirugna|scnskerghekr|erughalerigu|seuthgiseruhg";
         break;
     default:
         echo '404 not found';

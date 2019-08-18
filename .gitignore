@@ -4,6 +4,6 @@
 .vscode/launch.json
 .vscode/ipch
 .vscode/settings.json
-resources/skeleton.min.css.tar.gz
+resources/skeleton.min.css.gz
 include/*.inl
-.DSStore
+.DS_Store

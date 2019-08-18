@@ -7,49 +7,35 @@
         <!-- Блокирует отрисовку (((
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
         -->
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="/style.css">
         <link rel="icon" type="image/png" href="/favicon.png">
     </head>
     <body>
-        <div class="section">
-            <div class="container">
-                <h1 class="section-heading" style="text-align: center;">Умный светильник</h1>
-                <form method="POST" action="/save">
-                    <div class="row">
-                        <div class="one-third column">&nbsp;</div>
-                        <div class="one-third column">
-                            <label for="ssid">Точка доступа (<a href="#" 
-                                onclick="javascript:refeshAPList();">Обновить список</a>)</label>
-                            <select class="u-full-width" id="ssid" name="ssid"></select>
-                        </div>
-                        <div class="one-third column">&nbsp;</div>
+        <div class="container">
+            <h1 class="section-heading" style="text-align: center;">Умный светильник</h1>
+            <form method="POST" action="/save">
+                <div class="row">
+                    <div class="offset-by-four four columns">
+                        <label for="ssid">Точка доступа (<a href="#" 
+                            onclick="javascript:refeshAPList();">Обновить список</a>)</label>
+                        <select class="u-full-width" id="ssid" name="ssid"></select>
                     </div>
-
-                    <div class="row">
-                        <div class="one-third column">&nbsp;</div>
-                        <div class="one-third column">
-                            <label for="pass">Пароль</label>
-                            <input class="u-full-width" type="password" id="pass" name="pass" />
-                        </div>
-                        <div class="one-third column">&nbsp;</div>
-                    </div>
-
-                    <div class="row">
-                        <div class="one-third column">&nbsp;</div>
-                        <div class="one-third column">
-                            <input class="button-primary" type="button" value="Сохранить" 
-                                onclick="javascript:saveFormData();" />
-                        </div>
-                        <div class="one-third column">&nbsp;</div>
-                    </div>
-                </form>
-            </div>
-            <div class="section">
-                <div class="container">
-                    <ul id="logList">
-                    </ul>
                 </div>
-            </div>
+
+                <div class="row">
+                    <div class="offset-by-four four columns">
+                        <label for="pass">Пароль</label>
+                        <input class="u-full-width" type="password" id="pass" name="pass" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="offset-by-four four columns">
+                        <input class="button-primary" type="button" value="Сохранить" 
+                            onclick="javascript:saveFormData();" />
+                    </div>
+                </div>
+            </form>
         </div>
         <script type="text/javascript">
             function saveFormData() {
@@ -96,22 +82,9 @@
                 })
             };
 
-            function loadLogList() {
-                fetch('/loglist').then(function (response) {
-                    if (response.ok) {
-                        response.text.then(function(text) {
-                            var logList = docuemnt.getElementById("logList");
-                            logList.innerHTML = "";
-                            text.split("|").forEach(function (logEntry) {
-                                logList.innerHTML += "<li>" + logEntry + "</li>";
-                            })
-                        })
-                    }
-                })
-            }
-
             document.addEventListener('DOMContentLoaded', function () {
                 refeshAPList();    
+                loadLogList();
             });
         </script>
     </body>

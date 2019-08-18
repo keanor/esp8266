@@ -52,13 +52,13 @@ class WebServer : public IWebServer {
         }
 
         void stylesheet(void) {
-            server->setContentLength(resources_skeleton_min_css_tar_gz_len);
+            server->setContentLength(resources_skeleton_min_css_gz_len);
             server->sendHeader("Content-Encoding", "gzip");
             server->send_P(
                 200, 
                 "text/css", 
-                (char*)resources_skeleton_min_css_tar_gz, 
-                resources_skeleton_min_css_tar_gz_len
+                (char*)resources_skeleton_min_css_gz, 
+                resources_skeleton_min_css_gz_len
             );
         }
 
@@ -93,21 +93,34 @@ class WebServer : public IWebServer {
                 }
                 server->send(200, "text/plain", message);
             } else {
+                bool ret = true;
+
                 String ssid_str = server->arg("ssid");
                 char ssid_arr[ssid_str.length()];
                 memcpy(ssid_arr, ssid_str.c_str(), ssid_str.length());
-                storage->writeClientWiFiAP(ssid_arr);
+                if (storage->writeClientWiFiAP(ssid_arr)) {
+                    Serial.println("WiFi AP success writed!");
+                } else {
+                    ret = false;
+                }
 
                 String pass_str = server->arg("pass");
                 char pass_arr[pass_str.length()];
                 memcpy(pass_arr, pass_str.c_str(), pass_str.length());
-                storage->writeClientWiFiAP(pass_arr);
+                if (storage->writeClientWiFiAP(pass_arr)) {
+                    Serial.println("WiFi AP writed!");
+                } else {
+                    ret = false;
+                }
 
-                server->send(200, "text/plain", "success");
-
-                Serial.println("Configuration saved, restart hardware");
-                delay(200);
-                ESP.restart();
+                if (ret) {
+                    server->send(200, "text/plain", "success");
+                } else {
+                    server->send(200, "text/plain", "error");
+                    Serial.println("Configuration saved, restart hardware");
+                    delay(200);
+                    ESP.restart();
+                }
             }
         }
 };
