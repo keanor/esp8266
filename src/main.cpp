@@ -1,3 +1,4 @@
+// Внешние библиотеки из Arduino Framework
 #include <ESP8266WiFi.h> // Библиотека для работы с WiFi
 #include <EEPROM.h> // Библиотека для работы с FLASH
 #include <ESP8266WebServer.h> // Библиотека для работы с веб сервером
